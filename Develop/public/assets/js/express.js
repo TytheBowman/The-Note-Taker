@@ -29,6 +29,19 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
+app.get("/", function(req, res) {
+  res.sendFile(__dirname + "/public/notes.html");
+});
+
+app.get("/notes", function(req, res) {
+  res.sendFile(__dirname + "/public/notes.html");
+});
+
+app.get("*", function(req, res) {
+  res.sendFile(__dirname + "/public/index.html");
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`App listening on PORT ${PORT}`);

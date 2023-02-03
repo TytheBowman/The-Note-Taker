@@ -180,4 +180,69 @@ if (window.location.pathname === '/notes') {
   noteText.addEventListener('keyup', handleRenderSaveBtn);
 }
 
+const form = document.querySelector('form');
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const title = document.querySelector('input[name="title"]').value;
+  const text = document.querySelector('textarea[name="text"]').value;
+  fetch('/api/notes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      title: title,
+      text: text
+    })
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((error) => {
+      console.error('There was a problem with your fetch:', error);
+    });
+});
+
+const express = require('express');
+const app = express();
+const fs = require('fs');
+const path = require('path');
+const dbFile = path.join(__dirname, 'db.json');
+
+app.use(express.json());
+
+app.post('/api/notes', (req, res) => {
+  fs.readFile(dbFile, (err, data) => {
+    if (err) {
+      return res.status(500).send({ error: 'Error reading database' });
+    }
+    const notes = JSON.parse(data);
+    const newNote = {
+      id: notes.length + 1,
+      title: req.body.title,
+      text: req.body.text
+    };
+    notes.push(newNote);
+    fs.writeFile(dbFile, JSON.stringify(notes), (err) => {
+      if (err) {
+        return res.status(500).send({ error: 'Error writing to database' });
+      }
+      res.send(newNote);
+    });
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
+
+
+
 getAndRenderNotes();
